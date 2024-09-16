@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: mf-sample
+  datasource:
+    url: jdbc:mysql://localhost:3306/demo
+    username: root
+    password: R@admin123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+
+server:
+  port: 9090
+
+application:
+  security:
+    jwt:
+      secret: "DBCD95B41D27595CE4F5AB445E1E823B9570583F4E107E32E824D5149F7BE1700ECE0C251C8259052107C698E0163BBD34085B292D33EBE1CC574F7BB1096E31"
+
+data:
+  from:
+    api:
+      url: "https://api.mfapi.in/mf"

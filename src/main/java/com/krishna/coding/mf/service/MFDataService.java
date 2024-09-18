@@ -76,7 +76,7 @@ public class MFDataService {
         }
     }
 
-    @Cacheable(value = "MFScheme", key = "#schemeId", unless = "#result==null")
+    @Cacheable(value = "MFScheme", key = "#schemeId")
     private ResponseEntity<MFSchemeResponse> getMFSchemeDataResponse(Long schemeId) {
         apiUrl = apiUrl +"/"+ schemeId;
         return restTemplate.getForEntity(apiUrl, MFSchemeResponse.class);

@@ -1,7 +1,0 @@
-<hazelcast>
-    <network>
-        <join>
-            <multicast enabled="true"/>
-        </join>
-    </network>
-</hazelcast>

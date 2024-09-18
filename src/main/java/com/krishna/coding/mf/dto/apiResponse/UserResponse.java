@@ -5,14 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.Map;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @ToString
-public class MFSchemeHeader {
-    private String fund_house;
-    private String scheme_type;
-    private String scheme_category;
-    private Long scheme_code;
-    private String scheme_name;
+public class UserResponse {
+
+    private Map<String, Object> response;
 }

@@ -1,10 +1,10 @@
 package com.krishna.coding.mf.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishna.coding.mf.dto.DataApiResponse;
-import com.krishna.coding.mf.dto.apiResponse.MFSchemeResponse;
-import com.krishna.coding.mf.dto.request.RequestDto;
-import com.krishna.coding.mf.dto.response.MFResponse;
-import com.krishna.coding.mf.dto.response.ResponseDto;
+import com.krishna.coding.mf.dto.apiResponse.MFSchemeData;
 import com.krishna.coding.mf.entity.MFData;
 import com.krishna.coding.mf.repository.MFDataRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +36,9 @@ public class MFDataService {
 
     @Autowired
     private ApiDataMapper mapper;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public String getAndStoreData() {
 
@@ -58,27 +62,61 @@ public class MFDataService {
         return list.stream().map(mapper::toTableData).collect(Collectors.toList());
     }
 
-    public ResponseDto getAndFilterMFData(RequestDto requestDto) {
-        ResponseEntity<MFSchemeResponse> response = getMFSchemeDataResponse(requestDto.getRequest().getSchemeId());
-        //log.info("response : {}", response);
-        if (response.getBody() != null && response.getStatusCode() == HttpStatus.OK) {
-            MFSchemeResponse apiResponse = response.getBody();
+    public Map<String, Object> filterMFData(Map<String, Object> data, String filter) {
+        log.info("MFDataService -> filterMFData() here.");
+        Map<String, Object> response = new LinkedHashMap<>();
 
-            return ResponseDto.builder().response(
-                    MFResponse.builder().fundHouse(apiResponse.getMeta().getFund_house())
-                            .schemeCode(apiResponse.getMeta().getScheme_code())
-                            .schemeName(apiResponse.getMeta().getScheme_name())
-                            .build()
-            ).build();
-        } else {
-            // Handle errors
-            throw new RuntimeException("API call failed: " + response.getStatusCode());
+        Map<String, Object> meta = (Map<String, Object>) data.get("meta");
+        response.put("fundHouse",meta.get("fund_house"));
+        response.put("schemeCode",meta.get("scheme_code"));
+        response.put("schemeName",meta.get("scheme_name"));
+        //log.info("meta response : {}", response);
+
+        List<Map<String, String>> originalData = (List<Map<String, String>>) data.get("data");
+        List<MFSchemeData> jsonData = objectMapper.convertValue(originalData, new TypeReference<List<MFSchemeData>>() {});
+
+        LocalDate now = LocalDate.now();
+        LocalDate startDate = getStartDate(now, filter);
+
+        List<MFSchemeData> dateDataList = jsonData.stream()
+                .filter(dateData -> LocalDate.parse(dateData.getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")).isAfter(startDate))
+                .collect(Collectors.toList());
+        List<String> dates = dateDataList.stream().map(MFSchemeData::getDate).toList();
+        List<String> navs = dateDataList.stream().map(MFSchemeData::getNav).toList();
+        List<List<String>> filteredData = new ArrayList<>();
+        filteredData.add(dates);
+        filteredData.add(navs);
+        response.put("data",filteredData);
+        //log.info("response: {}", response);
+        return response;
+    }
+
+    private LocalDate getStartDate(LocalDate now, String filter) {
+        switch (filter){
+            case "1W" -> {
+                return now.minusWeeks(1);
+            }
+            case "1M" -> {
+                return now.minusMonths(1);
+            }
+            case "1Y" -> {
+                return now.minusYears(1);
+            }
+            case "5Y" -> {
+                return now.minusYears(5);
+            }
+            default -> throw new IllegalArgumentException("Invalid filter : " + filter);
         }
     }
 
     @Cacheable(value = "MFScheme", key = "#schemeId")
-    private ResponseEntity<MFSchemeResponse> getMFSchemeDataResponse(Long schemeId) {
-        apiUrl = apiUrl +"/"+ schemeId;
-        return restTemplate.getForEntity(apiUrl, MFSchemeResponse.class);
+    public Map<String, Object> getMFSchemeDataResponse(int schemeId) throws JsonProcessingException {
+        log.info("MFDataService -> getMFSchemeDataResponse() here.");
+        apiUrl = apiUrl + "/" + schemeId;
+        ResponseEntity<String> response = restTemplate.getForEntity(apiUrl, String.class);
+        String jsonData = response.getBody();
+        //log.info(" API response body : {}", jsonData);
+        Map<String, Object> data = objectMapper.readValue(jsonData, new TypeReference<Map<String, Object>>() {});
+        return data;
     }
 }

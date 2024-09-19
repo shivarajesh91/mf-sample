@@ -37,10 +37,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer :: disable)
                 .authorizeHttpRequests(request ->
                         request.requestMatchers("/api/v1/mf/user/**").permitAll()
-                                //.requestMatchers("/api/v1/mf/user/authenticate").permitAll()
                                 .requestMatchers("/api/v1/mf/data/from-api").hasRole("SUPER_ADMIN")
-                                .requestMatchers("/api/v1/mf/data/filter-api").hasRole("ADMIN")
-                                .requestMatchers("/api/v1/mf/data/filter-api").hasRole("USER")
+                                .requestMatchers("/api/v1/mf/data/filter-api").hasAnyRole("USER","ADMIN")
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

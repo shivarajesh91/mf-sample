@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krishna.coding.mf.dto.DataApiResponse;
-import com.krishna.coding.mf.dto.apiResponse.MFSchemeData;
+import com.krishna.coding.mf.dto.api.MFSchemeData;
 import com.krishna.coding.mf.entity.MFData;
 import com.krishna.coding.mf.repository.MFDataRepository;
 import lombok.extern.slf4j.Slf4j;

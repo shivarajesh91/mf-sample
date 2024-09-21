@@ -1,8 +1,8 @@
 package com.krishna.coding.mf.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.krishna.coding.mf.dto.apiResponse.UserRequest;
-import com.krishna.coding.mf.dto.apiResponse.UserResponse;
+import com.krishna.coding.mf.dto.api.UserRequest;
+import com.krishna.coding.mf.dto.api.UserResponse;
 import com.krishna.coding.mf.service.MFDataService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

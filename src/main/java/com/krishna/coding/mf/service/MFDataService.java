@@ -112,8 +112,8 @@ public class MFDataService {
     @Cacheable(value = "MFScheme", key = "#schemeId")
     public Map<String, Object> getMFSchemeDataResponse(int schemeId) throws JsonProcessingException {
         log.info("MFDataService -> getMFSchemeDataResponse() here.");
-        apiUrl = apiUrl + "/" + schemeId;
-        ResponseEntity<String> response = restTemplate.getForEntity(apiUrl, String.class);
+        String url = apiUrl + "/" + schemeId;
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         String jsonData = response.getBody();
         //log.info(" API response body : {}", jsonData);
         Map<String, Object> data = objectMapper.readValue(jsonData, new TypeReference<Map<String, Object>>() {});
